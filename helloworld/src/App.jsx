@@ -4,6 +4,8 @@ import Hello from './hello.jsx'
 import Display from './user.jsx'
 import Condition from './conditonal.jsx'
 import List from './list.jsx'
+import MyButton from './events.jsx'
+import Count from './userstate.jsx'
 
 // function App() {
 //   return (
@@ -20,6 +22,8 @@ const App=()=> {
       <Display />
       {cond && <Condition />}
       <List />
+      <MyButton />
+      <Count />
     </div>);
 };
 
