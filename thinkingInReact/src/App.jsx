@@ -1,4 +1,23 @@
-import React from 'react';
+import { useState } from 'react';
+
+function FilterableProductTable({ products }) {
+  const [filterText, setFilterText] = useState('');
+  const [inStockOnly, setInStockOnly] = useState(false);
+
+  return (
+    <div>
+      <SearchBar 
+        filterText={filterText} 
+        inStockOnly={inStockOnly} 
+        onFilterTextChange={setFilterText} 
+        onInStockOnlyChange={setInStockOnly} />
+      <ProductTable 
+        products={products} 
+        filterText={filterText}
+        inStockOnly={inStockOnly} />
+    </div>
+  );
+}
 
 function ProductCategoryRow({ category }) {
   return (
@@ -24,11 +43,21 @@ function ProductRow({ product }) {
   );
 }
 
-function ProductTable({ products }) {
+function ProductTable({ products, filterText, inStockOnly }) {
   const rows = [];
   let lastCategory = null;
 
   products.forEach((product) => {
+    if (
+      product.name.toLowerCase().indexOf(
+        filterText.toLowerCase()
+      ) === -1
+    ) {
+      return;
+    }
+    if (inStockOnly && !product.stocked) {
+      return;
+    }
     if (product.category !== lastCategory) {
       rows.push(
         <ProductCategoryRow
@@ -57,25 +86,27 @@ function ProductTable({ products }) {
   );
 }
 
-function SearchBar() {
+function SearchBar({
+  filterText,
+  inStockOnly,
+  onFilterTextChange,
+  onInStockOnlyChange
+}) {
   return (
     <form>
-      <input type="text" placeholder="Search..." />
+      <input 
+        type="text" 
+        value={filterText} placeholder="Search..." 
+        onChange={(e) => onFilterTextChange(e.target.value)} />
       <label>
-        <input type="checkbox" />
+        <input 
+          type="checkbox" 
+          checked={inStockOnly} 
+          onChange={(e) => onInStockOnlyChange(e.target.checked)} />
         {' '}
         Only show products in stock
       </label>
     </form>
-  );
-}
-
-function FilterableProductTable({ products }) {
-  return (
-    <div>
-      <SearchBar />
-      <ProductTable products={products} />
-    </div>
   );
 }
 
@@ -91,4 +122,3 @@ const PRODUCTS = [
 export default function App() {
   return <FilterableProductTable products={PRODUCTS} />;
 }
-
