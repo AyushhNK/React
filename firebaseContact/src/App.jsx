@@ -1,22 +1,28 @@
 import {useState,useEffect} from 'react'
 import Navbar from './components/Navbar'
+import ContactCard from './components/ContactCard'
+import AddAndUpdateContact from './components/AddAndUpdataContact'
+import useDisclose from './hooks/useDisclosure'
 import {FiSearch} from 'react-icons/fi'
 import {AiFillPlusCircle} from 'react-icons/ai'
-import {HiOutlineUserCircle} from 'react-icons/hi'
-import {IoMdTrash} from 'react-icons/io'
-import {RiEditCircleLine} from 'react-icons/ri'
-import {collection,getDocs} from 'firebase/firestore'
+import {collection,getDocs,onSnapshot} from 'firebase/firestore'
 import {db} from './config/firebase'
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 export default function App() {
 
   const [contacts,setContacts]=useState([])
+  const {isOpen,onClose,onOpen}=useDisclose()
+
   useEffect(()=>{
     const getContacts= async()=>{
       try{
         const contactsRef=collection(db,"contacts");
-        const contactsSnapshot=await getDocs(contactsRef)
-        const contactLists=contactsSnapshot.docs.map((doc)=>{
+        
+        onSnapshot(contactsRef,(snapshot)=>{
+          const contactLists=snapshot.docs.map((doc)=>{
           return{
             id:doc.id,
             ...doc.data()
@@ -24,12 +30,37 @@ export default function App() {
           }
         })
         setContacts(contactLists)
+        return contactLists
+        })
       }catch(error){
-        console.log(error)
+        console.error(error)
       }
     }
     getContacts()
   },[])
+
+const filterContacts = (e) => {
+    const value = e.target.value;
+
+    const contactsRef = collection(db, "contacts");
+
+    onSnapshot(contactsRef, (snapshot) => {
+      const contactLists = snapshot.docs.map((doc) => {
+        return {
+          id: doc.id,
+          ...doc.data(),
+        };
+      });
+
+      const filteredContacts = contactLists.filter((contact) =>
+        contact.name.toLowerCase().includes(value.toLowerCase())
+      );
+
+      setContacts(filteredContacts);
+
+      return filteredContacts;
+    });
+  }
 
   return (
     <>
@@ -38,28 +69,18 @@ export default function App() {
         <div className="flex gap-2">
           <div className="flex relative items-center flex-grow">
             <FiSearch className="ml-1 text-white text-3xl absolute"/>
-            <input type="text" className=" text-white pl-9 flex-grow rounded-md border bg-transparent border-white h-10"/>
+            <input onChange={filterContacts} type="text" className=" text-white pl-9 flex-grow rounded-md border bg-transparent border-white h-10"/>
           </div>
-            <AiFillPlusCircle className=" cusor-pointer text-5xl text-white "/>
+            <AiFillPlusCircle onClick={onOpen} className=" cusor-pointer text-5xl text-white "/>
         </div>
-        <div className="">
+        <div className="mt-4 gap-3 flex flex-col">
           {contacts.map(contact=>(
-            <div key={contact.id} className="bg-yellow">
-              <div className="">
-                <HiOutlineUserCircle className="text-orange text-3xl"/>
-                <div className="text-white">
-                  <h1 className="">{contact.name}</h1>
-                  <p className="">{contact.email}</p>
-                </div>
-              </div>
-              <div className="">
-                <RiEditCircleLine/>
-                <IoMdTrash/>
-              </div>
-            </div>
+            <ContactCard contact={contact}/>
             ))}
         </div>
       </div>
+      <AddAndUpdateContact isOpen={isOpen} onClose={onClose}/>
+      <ToastContainer position="bottom-center" />
     </>
   )
 }
