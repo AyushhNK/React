@@ -1,115 +1,119 @@
-const redux=require('redux')
-const createStore=redux.createStore
+const redux = require('redux')
+const createStore = redux.createStore
+const bindActionCreators = redux.bindActionCreators
+const combineReducers=redux.combineReducers
 
-//const CAKE_ORDERED = 'CAKE_ORDERED'
-//const CAKE_RESTOCKED='CAKE_RESTOCKED'
-//
-////Action creator
-//function orderCake() {
-//
-//    return {
-//        type: CAKE_ORDERED,
-//        quantity: 1
-//    }
-//}
-//
-//function restockCake(qty=1){
-//    return {
-//        type:CAKE_RESTOCKED,
-//        quantity:qty
-//    }
-//}
-//
-//const initialState={
-//    noOfCakes:10,
-//}
-//
-////Reducer
-//const reducer=(state=initialState,action)=>{
-//    switch(action.type){
-//        case CAKE_ORDERED:
-//            return {
-//                ...state,
-//                noOfCakes:state.noOfCakes-1,
-//            }
-//        case CAKE_RESTOCKED:
-//            return {
-//                ...state,
-//                noOfCakes:state.noOfCakes+action.quantity
-//            }
-//        default:
-//            return state
-//    }
-//    
-//}
-//
-////Store
-//const store=createStore(reducer)
-//console.log('Initial State',store.getState())
-//
-////subscribe to the store
-//const unsubscribe=store.subscribe(()=>console.log('updateState',store.getState()))
-//
-//
-////dispatching the action
+const CAKE_ORDERED = 'CAKE_ORDERED'
+const CAKE_RESTOCKED = 'CAKE_RESTOCKED'
+const ICECREAM_ORDERED = 'ICECREAM_ORDERED'
+const ICECREAM_RESTOCKED = 'ICECREAM_RESTOCKED'
+
+//Action creator
+function orderCake() {
+
+    return {
+        type: CAKE_ORDERED,
+        quantity: 1
+    }
+}
+
+function restockCake(qty = 1) {
+    return {
+        type: CAKE_RESTOCKED,
+        quantity: qty
+    }
+}
+
+function orderIcecream(qty = 1) {
+    return {
+        type: ICECREAM_ORDERED,
+        payload: qty
+    }
+}
+
+function restockIcecream(qty = 1) {
+    return {
+        type: ICECREAM_RESTOCKED,
+        payload: qty
+    }
+}
+
+const initialCakeState = {
+    noOfCakes: 10
+}
+
+const initialIcecreamState = {
+    noOfIcecream: 20
+}
+//Reducer
+const Cakereducer = (state = initialCakeState, action) => {
+    switch (action.type) {
+        case CAKE_ORDERED:
+            return {
+                ...state,
+                noOfCakes: state.noOfCakes - 1,
+            }
+            case CAKE_RESTOCKED:
+                return {
+                    ...state,
+                    noOfCakes: state.noOfCakes + action.quantity
+                }
+                default:
+                    return state
+    }
+
+}
+
+const Icecreamreducer = (state = initialIcecreamState, action) => {
+    switch (action.type) {
+        case ICECREAM_ORDERED:
+            return {
+                ...state,
+                noOfIcecream: state.noOfIcecream - 1,
+            }
+            case ICECREAM_RESTOCKED:
+                return {
+                    ...state,
+                    noOfIcecream: state.noOfIcecream + action.payload
+                }
+                default:
+                    return state
+    }
+
+}
+
+const rootReducer=combineReducers({
+    cake:Cakereducer,
+    icecream:Icecreamreducer
+})
+
+//Store
+const store = createStore(rootReducer)
+console.log('Initial State', store.getState())
+
+//subscribe to the store
+const unsubscribe = store.subscribe(() => console.log('updateState', store.getState()))
+
+
+//dispatching the action
 //store.dispatch(orderCake())
 //store.dispatch(orderCake())
 //store.dispatch(orderCake())
 //store.dispatch(restockCake(8))
-//
-////unsubscribing the store
-//unsubscribe()
 
-const INCREMENT="INCREMENT"
-const DECREMENT="DECREMENT"
+//binding the classes
+const action = bindActionCreators({
+    orderCake,
+    restockCake,
+    orderIcecream,
+    restockIcecream
+}, store.dispatch)
 
-function incrementNumber() {
-    return {
-        type:INCREMENT,
-        payload:1
-    }
-}
+action.orderCake()
+action.restockCake(5)
+action.orderIcecream()
+action.orderIcecream()
+action.restockIcecream(3)
 
-function decrementNumber(){
-    return {
-        type:DECREMENT,
-        payload:1
-    }
-}
-
-const initialState={
-    value:0
-}
-
-const reducer=(state=initialState,action)=>{
-    switch(action.type){
-        case INCREMENT:
-            return {
-                ...state,
-                value:state.value+1
-            }
-        case DECREMENT:
-            return {
-                ...state,
-                value:state.value-1
-            }
-        default:
-            return state
-    }
-}
-
-const store=createStore(reducer)
-
-console.log("initial state",store.getState())
-
-const unsubscribe=store.subscribe(()=>console.log("updatedState",store.getState()))
-
-store.dispatch(incrementNumber())
-store.dispatch(incrementNumber())
-store.dispatch(incrementNumber())
-store.dispatch(incrementNumber())
-store.dispatch(decrementNumber())
-store.dispatch(decrementNumber())
-store.dispatch(decrementNumber())
-
+//unsubscribing the store
 unsubscribe()
